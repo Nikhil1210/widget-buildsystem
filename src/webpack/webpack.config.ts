@@ -33,10 +33,9 @@ interface IWidgetDescriptor{
  * @param projectDir the folder of yuor project (usually `__dirname`)
  */
 export function webpackConfiguration(projectDir: string, buildEnv?:WidgetBuildEnv){
-    doLog(`== Thanks for using @widget/buildsystem v${require("../../package.json").version} ==`);
-    doLog(`bundling ${chalk.green(projectDir)}`);
-
-    const {env, src} = getGetEnv(buildEnv);
+doLog(`== Thanks for using @widget/buildsystem v${require("../../package.json").version} ==`);
+doLog(`bundling ${chalk.green(projectDir)}`);
+const {env, src} = getGetEnv(buildEnv);
 doLog(`environment is ${chalk.green(env)} from ${src})`);
 const widgets = getWidgets(projectDir);
 logWidgets(widgets);
@@ -49,9 +48,9 @@ const config = webpack.configuration={
     output:{
         filename:"[name].js",
         path: path.resolve(projectDir, env),
-        publicPath: ""}     
-}, 
-    plugins: getPlugins(projectDir, any, widgets),
+        publicPath: ""   
+    }, 
+    plugins: getPlugins(projectDir, env, widgets),
     resolve:{
         alias: {
             // nit neccessary unless we consume a model using 'createclass
@@ -100,7 +99,7 @@ function getGetEnv(buildEnv?: WidgetBuildEnv): {env: WidgetBuildEnv, src: string
 function getWidgets(projectDir: string){
     const srcDir = path.resolve(projectDir, "src");
     const webComponentPattern = /\/src\/([^\/]*)\/\1\.tsx$/;
-    const detectedWidgets = IWidgetDescriptor[] = glob.sync(`${srcDir}/!(common)/*.tsx`).filter((x)=> webComponentPattern.test(x))
+    const detectedWidgets : IWidgetDescriptor[] = glob.sync(`${srcDir}/!(common)/*.tsx`).filter((x)=> webComponentPattern.test(x))
     .map((name) => {
         const sourcePath = path.resolve(name);
         const widgetPathNoExt = sourcePath.replace(/\.[^/.]+$/,"");
@@ -245,7 +244,7 @@ function logWidget(w: IWidgetDescriptor & {status: "VALID" | "WARNING" }){
     const warningMsg= "WRONG NAMING";
     const blank = warningMsg.replace(/./g, " ");
     const status = w.status === "WARNING" ? chalk.yellow(warningMsg): blank;
-    const name: chalk.cyan(w.name);
+    const name= chalk.cyan(w.name);
     const samples = w.htmlSamples ? w.htmlSamples.map((s) => s.htmlSampleName):[];
     const readmes = w.readmes || [];
     doLog(`${name}, samples:${samples.length} READMEs: ${readmes.length}`);
